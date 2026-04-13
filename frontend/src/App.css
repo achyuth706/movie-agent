@@ -1,0 +1,8 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}

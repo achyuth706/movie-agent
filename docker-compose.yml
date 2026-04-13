@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  mcp-server:
+    build: ./mcp-server
+    ports:
+      - "8001:8001"
+    environment:
+      - OMDB_API_KEY=${OMDB_API_KEY}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - movie-agent-network
+
+  agent-backend:
+    build: ./agent-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - MCP_SERVER_URL=http://mcp-server:8001
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+    networks:
+      - movie-agent-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - agent-backend
+    networks:
+      - movie-agent-network
+
+networks:
+  movie-agent-network:
+    driver: bridge
