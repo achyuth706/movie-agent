@@ -104,6 +104,46 @@ def _extract_text_tool_call(content: str):
     return None, None
 
 
+def _strip_embedded_tool_call(content: str) -> str:
+    """Some models prepend a plain-text tool call JSON block before their answer.
+    Strip it so only the natural-language answer is returned to the user."""
+    import json
+    stripped = content.lstrip()
+    if not stripped.startswith('{'):
+        return content
+
+    # Walk the string to find the matching closing brace (handles nested braces)
+    depth, end = 0, -1
+    for i, ch in enumerate(stripped):
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                end = i
+                break
+
+    if end == -1:
+        return content
+
+    json_part = stripped[:end + 1]
+    rest = stripped[end + 1:].strip()
+
+    # Only strip if there is actual answer text after the JSON block
+    if not rest:
+        return content
+
+    try:
+        data = json.loads(json_part)
+        name = data.get("name")
+        if name and name in TOOL_MAP:
+            return rest
+    except Exception:
+        pass
+
+    return content
+
+
 def run_agent(user_message: str, chat_history: list) -> str:
     """Run the movie agent with a standard tool-calling loop.
 
@@ -143,8 +183,8 @@ def run_agent(user_message: str, chat_history: list) -> str:
             final = llm.invoke(messages)
             return final.content
 
-        # No tool call — plain text answer
-        return response.content
+        # No tool call — plain text answer (strip any accidental JSON prefix)
+        return _strip_embedded_tool_call(response.content)
 
     last = messages[-1]
     return last.content if hasattr(last, "content") else "Could not complete that request. Please try again."
