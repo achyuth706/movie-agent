@@ -23,7 +23,7 @@ An AI-powered movie assistant that answers natural-language questions about film
 | Frontend        | React 18, Vite, CSS                         | Chat UI — sends messages, renders agent responses    |
 | Agent Backend   | Python, FastAPI, LangChain, Cerebras LLM    | Runs the LLM agent; selects and calls MCP tools      |
 | MCP Server      | Python, FastAPI, Requests                   | Wraps OMDb API into structured HTTP endpoints        |
-| LLM             | Cerebras API — `llama-3.3-70b-versatile`    | Tool-calling language model powering the agent       |
+| LLM             | Cerebras API — `llama-3.1-8b-versatile`     | Tool-calling language model powering the agent       |
 | Movie Data      | OMDb API                                    | Source of all movie and TV series information        |
 
 ---
@@ -46,7 +46,7 @@ Both keys are free to obtain:
 | Key              | Where to get it                                                        |
 |------------------|------------------------------------------------------------------------|
 | `OMDB_API_KEY`   | [omdbapi.com/apikey.aspx](https://www.omdbapi.com/apikey.aspx)         |
-| `CEREBRAS_API_KEY`   | [https://cloud.cerebras.ai](sign in to create an API key)                           |
+| `CEREBRAS_API_KEY`   | [https://cloud.cerebras.ai] (sign in to create an API key)                           |
 
 ---
 
