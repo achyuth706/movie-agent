@@ -1,7 +1,7 @@
 """
 LangChain tools for the movie agent.
 
-Each tool wraps one MCP server endpoint. The Gemini agent inspects each
+Each tool wraps one MCP server endpoint. The LLM Model agent inspects each
 tool's name and docstring to decide which tool to call and with what input.
 MCP_SERVER_URL is loaded from .env so the base URL can be changed without
 touching code.
