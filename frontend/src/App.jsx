@@ -8,7 +8,7 @@ const AGENT_URL = 'http://localhost:8000/chat';
 
 const WELCOME = {
   role: 'agent',
-  content: "Hey! I'm Flick AI — your personal guide to movies and TV. Ask me anything and I'll find your next obsession. 🎬",
+  content: "Hey! I'm CineMind — your personal guide to movies and TV. Ask me anything and I'll find your next obsession. 🎬",
 };
 
 export default function App() {

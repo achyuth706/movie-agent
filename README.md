@@ -9,7 +9,7 @@ An AI-powered movie assistant that answers natural-language questions about film
 ```
 ┌─────────────────────┐        ┌──────────────────────┐        ┌─────────────────────┐        ┌─────────────┐
 │      Frontend       │        │   Agent Backend      │        │     MCP Server      │        │  OMDb API   │
-│   React + Vite      │──────▶ │  FastAPI + LangChain │──────▶ │     FastAPI         │──────▶ │ omdbapi.com │
+│   React + Vite      │──────▶│  FastAPI + LangChain │──────▶ │     FastAPI         │──────▶│ omdbapi.com  │   
 │   localhost:3000    │        │   localhost:8000     │        │   localhost:8001    │        │             │
 └─────────────────────┘        └──────────────────────┘        └─────────────────────┘        └─────────────┘
 ```
@@ -176,7 +176,7 @@ movie-agent/
 
 Ask the agent anything like:
 
-1. *"What is Inception about and who directed it?"*
+1. *"What is Presitge about and who directed it?"*
 2. *"How many seasons does Breaking Bad have?"*
 3. *"What did critics think of Parasite? Show me the Rotten Tomatoes score."*
 4. *"Find me some Batman movies from 2008."*

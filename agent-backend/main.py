@@ -22,7 +22,7 @@ load_dotenv()
 
 from agent import run_agent  # noqa: E402 — must come after load_dotenv
 
-MODEL_NAME = "llama-3.3-70b-versatile"  # must match agent.py
+MODEL_NAME = "llama3.1-8b (Cerebras)"
 
 app = FastAPI(title="Movie Agent Backend")
 
@@ -53,7 +53,7 @@ def health():
 def chat(request: ChatRequest):
     """Send a user message to the movie agent and return its response.
 
-    The agent uses Gemini to decide which MCP server tools to call, fetches
+    The agent uses Cerebras API to decide which MCP server tools to call, fetches
     real movie data, and returns a natural-language reply.
 
     Args (JSON body):

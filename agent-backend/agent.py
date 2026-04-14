@@ -1,17 +1,13 @@
 """
 LangChain agent for the movie assistant.
 
-Uses ChatOpenAI pointed at Groq's OpenAI-compatible endpoint with a manual
-tool-calling loop. The manual loop lets us intercept Groq's 400/tool_use_failed
-errors — which happen when llama-3.3-70b-versatile generates its native
-<function=name{...}> syntax instead of JSON — parse the failed_generation field,
-execute the tool ourselves, and continue the conversation normally.
+Uses Cerebras Inference via the OpenAI-compatible endpoint.
+Free tier: no daily token limit, 30 RPM — plenty for this app.
+Get a free API key at https://cloud.cerebras.ai
 """
 
 import os
-import re
 import sys
-import json
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
@@ -26,9 +22,9 @@ from tools import (
 
 load_dotenv()
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-if not GROQ_API_KEY:
-    print("ERROR: GROQ_API_KEY is not set. Add it to agent-backend/.env and restart.")
+CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
+if not CEREBRAS_API_KEY:
+    print("ERROR: CEREBRAS_API_KEY is not set. Add it to agent-backend/.env and restart.")
     sys.exit(1)
 
 TOOLS = [
@@ -64,34 +60,14 @@ a different search term or related title.
 rather than dumping raw tool output at the user.
 6. Keep answers focused and concise unless the user explicitly asks for more detail."""
 
-# Use langchain-openai → Groq's OpenAI-compatible endpoint so tool calls are
-# always sent as standard JSON schema. langchain-groq lets Llama fall back to
-# its native <function=...> format, which Groq's API then rejects with a 400.
 llm = ChatOpenAI(
-    model="llama-3.3-70b-versatile",
-    api_key=GROQ_API_KEY,
-    base_url="https://api.groq.com/openai/v1",
+    model="llama3.1-8b",
+    api_key=CEREBRAS_API_KEY,
+    base_url="https://api.cerebras.ai/v1",
     temperature=0,
 )
-llm_with_tools = llm.bind_tools(TOOLS)
-
-# Matches Llama's native function-call format inside Groq's error string:
-# <function=tool_name{"arg": "value"}</function>
-_FAILED_GEN_RE = re.compile(
-    r"<function=(?P<name>\w+)(?P<args>\{.*?\})(?:</function>)?",
-    re.DOTALL,
-)
-
-
-def _parse_failed_generation(error_str: str):
-    """Extract tool name and parsed args from a Groq tool_use_failed error string."""
-    m = _FAILED_GEN_RE.search(error_str)
-    if not m:
-        return None, None
-    try:
-        return m.group("name"), json.loads(m.group("args"))
-    except json.JSONDecodeError:
-        return None, None
+llm_with_tools = llm.bind_tools(TOOLS)  # used for tool-calling turns
+# llm (plain, no tools) is used for the final synthesis turn
 
 
 def _deserialize_history(chat_history: list) -> list:
@@ -111,15 +87,29 @@ def _deserialize_history(chat_history: list) -> list:
     return converted
 
 
-def run_agent(user_message: str, chat_history: list) -> str:
-    """Run the movie agent with a manual tool-calling loop and format-error recovery.
+def _extract_text_tool_call(content: str):
+    """Some small models output the tool call as plain text JSON instead of a
+    structured tool_calls field. Detect and parse it so we can still execute it."""
+    import json, re
+    try:
+        # Strip markdown code fences if present
+        clean = re.sub(r"```(?:json)?|```", "", content).strip()
+        data = json.loads(clean)
+        name = data.get("name")
+        args = data.get("arguments") or data.get("args") or {}
+        if name and name in TOOL_MAP:
+            return name, args
+    except Exception:
+        pass
+    return None, None
 
-    On each iteration we call the LLM. Three outcomes:
-      1. Model returns a normal text response → return it.
-      2. Model returns a valid tool_call → execute the tool, append result, loop.
-      3. Groq raises 400/tool_use_failed (model used native Llama format) →
-         parse failed_generation, run the tool ourselves, ask the LLM to
-         synthesize the result, return that.
+
+def run_agent(user_message: str, chat_history: list) -> str:
+    """Run the movie agent with a standard tool-calling loop.
+
+    Also handles the case where a small model outputs its tool call as plain
+    text JSON instead of a structured tool_calls — we parse and execute it
+    manually, then ask the model to synthesize the result into a clean answer.
     """
     messages = (
         [SystemMessage(content=SYSTEM_PROMPT)]
@@ -128,53 +118,33 @@ def run_agent(user_message: str, chat_history: list) -> str:
     )
 
     for _ in range(8):  # cap iterations to avoid runaway loops
-        try:
-            response = llm_with_tools.invoke(messages)
-        except Exception as exc:
-            err = str(exc)
-            if "tool_use_failed" not in err:
-                raise
-
-            # ── Recovery path ──────────────────────────────────────────────
-            # Groq rejected the model's native <function=...> call. Parse it,
-            # run the tool ourselves, then ask the LLM to answer from the result.
-            tool_name, tool_args = _parse_failed_generation(err)
-            if tool_name and tool_name in TOOL_MAP:
-                tool_result = TOOL_MAP[tool_name].invoke(tool_args)
-                messages.append(
-                    SystemMessage(
-                        content=(
-                            f"The tool '{tool_name}' returned the following data:\n\n"
-                            f"{tool_result}\n\n"
-                            "Use this data to answer the user's question conversationally."
-                        )
-                    )
-                )
-                recovery = llm.invoke(messages)  # plain LLM, no tools
-                return recovery.content
-
-            # Could not recover — surface a clean error
-            raise RuntimeError(
-                f"Tool call failed and could not be recovered (tool='{tool_name}'). "
-                "Please try rephrasing your question."
-            ) from exc
-
-        # Normal path
+        response = llm_with_tools.invoke(messages)
         messages.append(response)
 
-        if not response.tool_calls:
-            return response.content
+        # Happy path: model issued a proper structured tool call
+        if response.tool_calls:
+            for tc in response.tool_calls:
+                tool = TOOL_MAP.get(tc["name"])
+                result = tool.invoke(tc["args"]) if tool else f"Unknown tool: {tc['name']}"
+                messages.append(ToolMessage(content=str(result), tool_call_id=tc["id"]))
+            continue
 
-        for tc in response.tool_calls:
-            tool = TOOL_MAP.get(tc["name"])
-            if tool:
-                result = tool.invoke(tc["args"])
-            else:
-                result = f"Unknown tool requested: {tc['name']}"
-            messages.append(
-                ToolMessage(content=str(result), tool_call_id=tc["id"])
+        # Fallback: model dumped the tool call as plain text JSON
+        tool_name, tool_args = _extract_text_tool_call(response.content)
+        if tool_name:
+            tool_result = TOOL_MAP[tool_name].invoke(tool_args)
+            # Replace the bad response with a proper context message and re-ask
+            messages[-1] = SystemMessage(
+                content=(
+                    f"Tool '{tool_name}' returned:\n\n{tool_result}\n\n"
+                    "Now answer the user's question conversationally using this data."
+                )
             )
+            final = llm.invoke(messages)
+            return final.content
 
-    # Fallback if max iterations hit
+        # No tool call — plain text answer
+        return response.content
+
     last = messages[-1]
     return last.content if hasattr(last, "content") else "Could not complete that request. Please try again."

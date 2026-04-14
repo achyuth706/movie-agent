@@ -34,14 +34,14 @@
 }
 
 .chat-header-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 22px;
-  font-weight: 900;
+  font-family: 'Russo One', sans-serif;
+  font-size: 26px;
+  font-weight: 400;
   color: #fff;
   letter-spacing: 3px;
   text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(229, 9, 20, 0.6), 0 1px 4px rgba(0, 0, 0, 0.8);
-  line-height: 1.1;
+  text-shadow: 0 0 16px rgba(229, 9, 20, 0.7), 0 2px 6px rgba(0, 0, 0, 0.9);
+  line-height: 1;
 }
 
 .chat-header-tagline {
@@ -63,6 +63,13 @@
   background: var(--bg-messages);
   scrollbar-width: thin;
   scrollbar-color: var(--accent-border) transparent;
+  align-items: center; /* center children horizontally */
+}
+
+/* All direct children (message rows, suggestions, typing indicator) share the same centered column */
+.message-list > * {
+  width: 100%;
+  max-width: 760px;
 }
 
 .message-list::-webkit-scrollbar {
@@ -89,18 +96,16 @@
 .message-row {
   display: flex;
   flex-direction: column;
-  max-width: 78%;
+  width: 100%;           /* fill the centered 760px column */
   animation: fadeSlideIn 0.22s ease-out both;
 }
 
 .message-row.user {
-  align-self: flex-end;
-  align-items: flex-end;
+  align-items: flex-end;   /* bubble hugs the right of the column */
 }
 
 .message-row.agent {
-  align-self: flex-start;
-  align-items: flex-start;
+  align-items: flex-start; /* bubble hugs the left of the column */
 }
 
 @keyframes fadeSlideIn {
@@ -158,8 +163,7 @@
 
 /* ── Suggestion chips ── */
 .suggestions {
-  align-self: flex-start;
-  max-width: 78%;
+  width: 100%;
   animation: fadeSlideIn 0.3s ease-out both;
   animation-delay: 0.1s;
 }
@@ -242,9 +246,8 @@
 
 /* ── Responsive ── */
 @media (max-width: 600px) {
-  .message-row      { max-width: 92%; }
-  .suggestions      { max-width: 92%; }
   .message-list     { padding: 18px 12px; gap: 16px; }
+  .message-list > * { max-width: 100%; }
   .chat-header      { padding: 14px 16px; }
   .message-bubble   { font-size: 14px; padding: 10px 14px; }
   .suggestion-chip  { font-size: 12px; padding: 6px 11px; }

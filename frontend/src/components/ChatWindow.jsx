@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import './ChatWindow.css';
 
 const SUGGESTIONS = [
-  'What is Inception about?',
+  'What is The Big Bang Theory about?',
   'How many seasons does Breaking Bad have?',
   'What are the ratings for Interstellar?',
 ];
@@ -11,7 +11,7 @@ const SUGGESTIONS = [
 function TypingIndicator() {
   return (
     <div className="message-row agent">
-      <div className="message-label">Flick AI</div>
+      <div className="message-label">CineMind</div>
       <div className="message-bubble agent typing-bubble">
         <span className="dot" />
         <span className="dot" />
@@ -36,7 +36,7 @@ export default function ChatWindow({ messages, isLoading, onSuggest }) {
       <header className="chat-header">
         <span className="chat-header-icon">🎬</span>
         <div className="chat-header-text">
-          <span className="chat-header-title">Flick AI</span>
+          <span className="chat-header-title">CineMind</span>
           <span className="chat-header-tagline">Find your next obsession in seconds.</span>
         </div>
       </header>
@@ -45,7 +45,7 @@ export default function ChatWindow({ messages, isLoading, onSuggest }) {
         {messages.map((msg, i) => (
           <div key={i} className={`message-row ${msg.role}`}>
             <div className="message-label">
-              {msg.role === 'user' ? 'You' : 'Flick AI'}
+              {msg.role === 'user' ? 'You' : 'CineMind'}
             </div>
             <div className={`message-bubble ${msg.role}${msg.isError ? ' error' : ''}`}>
               {msg.role === 'agent' ? (
