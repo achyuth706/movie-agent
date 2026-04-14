@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ChatWindow from './components/ChatWindow';
 import ChatInput from './components/ChatInput';
 import './App.css';
 
-const AGENT_URL = 'http://localhost:8000/chat';
+const AGENT_URL  = 'http://localhost:8000/chat';
+const HEALTH_URL = 'http://localhost:8000/health';
 
 const WELCOME = {
   role: 'agent',
@@ -12,10 +13,26 @@ const WELCOME = {
 };
 
 export default function App() {
-  const [messages, setMessages] = useState([WELCOME]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages]       = useState([WELCOME]);
+  const [isLoading, setIsLoading]     = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue]   = useState('');
+  const [isOnline, setIsOnline]       = useState(false);
+
+  /* ── Backend health check ── */
+  useEffect(() => {
+    async function check() {
+      try {
+        await axios.get(HEALTH_URL, { timeout: 3000 });
+        setIsOnline(true);
+      } catch {
+        setIsOnline(false);
+      }
+    }
+    check();
+    const id = setInterval(check, 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   async function handleSend(userText) {
     const text = userText.trim();
@@ -37,7 +54,7 @@ export default function App() {
       setChatHistory(prev => [
         ...prev,
         { role: 'human', content: text },
-        { role: 'ai', content: agentText },
+        { role: 'ai',    content: agentText },
       ]);
     } catch (err) {
       const detail =
@@ -56,18 +73,21 @@ export default function App() {
   }
 
   return (
-    <div className="app-layout">
-      <ChatWindow
-        messages={messages}
-        isLoading={isLoading}
-        onSuggest={setInputValue}
-      />
-      <ChatInput
-        value={inputValue}
-        onChange={setInputValue}
-        onSend={handleSend}
-        isLoading={isLoading}
-      />
+    <div className="app-shell">
+      <div className="app-layout">
+        <ChatWindow
+          messages={messages}
+          isLoading={isLoading}
+          isOnline={isOnline}
+          onSuggest={setInputValue}
+        />
+        <ChatInput
+          value={inputValue}
+          onChange={setInputValue}
+          onSend={handleSend}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 }
