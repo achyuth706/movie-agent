@@ -18,7 +18,7 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
-      - key: CEREBRAS_API_KEY
+      - key: GROQ_API_KEY
         sync: false
       - key: MCP_SERVER_URL
         value: https://movie-mcp-server-r7ey.onrender.com

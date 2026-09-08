@@ -1,9 +1,9 @@
 """
 LangChain agent for the movie assistant.
 
-Uses Cerebras Inference via the OpenAI-compatible endpoint.
-Free tier: no daily token limit, 30 RPM — plenty for this app.
-Get a free API key at https://cloud.cerebras.ai
+Uses Groq Inference via the OpenAI-compatible endpoint.
+Free tier: no card required — plenty for this app.
+Get a free API key at https://console.groq.com
 """
 
 import os
@@ -22,9 +22,9 @@ from tools import (
 
 load_dotenv()
 
-CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
-if not CEREBRAS_API_KEY:
-    print("ERROR: CEREBRAS_API_KEY is not set. Add it to agent-backend/.env and restart.")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    print("ERROR: GROQ_API_KEY is not set. Add it to agent-backend/.env and restart.")
     sys.exit(1)
 
 TOOLS = [
@@ -61,9 +61,9 @@ rather than dumping raw tool output at the user.
 6. Keep answers focused and concise unless the user explicitly asks for more detail."""
 
 llm = ChatOpenAI(
-    model="gpt-oss-120b",
-    api_key=CEREBRAS_API_KEY,
-    base_url="https://api.cerebras.ai/v1",
+    model="llama-3.3-70b-versatile",
+    api_key=GROQ_API_KEY,
+    base_url="https://api.groq.com/openai/v1",
     temperature=0,
 )
 llm_with_tools = llm.bind_tools(TOOLS)  # used for tool-calling turns

@@ -21,9 +21,9 @@ An AI-powered movie assistant that answers natural-language questions about film
 | Service         | Technology                                  | Purpose                                              |
 |-----------------|---------------------------------------------|------------------------------------------------------|
 | Frontend        | React 18, Vite, CSS                         | Chat UI — sends messages, renders agent responses    |
-| Agent Backend   | Python, FastAPI, LangChain, Cerebras LLM    | Runs the LLM agent; selects and calls MCP tools      |
+| Agent Backend   | Python, FastAPI, LangChain, Groq LLM        | Runs the LLM agent; selects and calls MCP tools      |
 | MCP Server      | Python, FastAPI, Requests                   | Wraps OMDb API into structured HTTP endpoints        |
-| LLM             | Cerebras API — `llama-3.1-8b-versatile`     | Tool-calling language model powering the agent       |
+| LLM             | Groq API — `llama-3.3-70b-versatile`        | Tool-calling language model powering the agent       |
 | Movie Data      | OMDb API                                    | Source of all movie and TV series information        |
 
 ---
@@ -46,7 +46,7 @@ Both keys are free to obtain:
 | Key              | Where to get it                                                        |
 |------------------|------------------------------------------------------------------------|
 | `OMDB_API_KEY`   | [omdbapi.com/apikey.aspx](https://www.omdbapi.com/apikey.aspx)         |
-| `CEREBRAS_API_KEY`   | [https://cloud.cerebras.ai] (sign in to create an API key)                           |
+| `GROQ_API_KEY`   | [console.groq.com/keys](https://console.groq.com/keys) (sign in to create an API key) |
 
 ---
 
@@ -61,7 +61,7 @@ cd movie-agent
 **2. Create your `.env` file**
 ```bash
 cp .env.example .env
-# Open .env and fill in your OMDB_API_KEY and CEREBRAS_API_KEY
+# Open .env and fill in your OMDB_API_KEY and GROQ_API_KEY
 ```
 
 **3. Build and start all services**
@@ -109,7 +109,7 @@ cd agent-backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-echo "CEREBRAS_API_KEY=your_key_here" > .env
+echo "GROQ_API_KEY=your_key_here" > .env
 echo "MCP_SERVER_URL=http://localhost:8001" >> .env
 uvicorn main:app --port 8000 --reload
 ```
@@ -138,7 +138,7 @@ movie-agent/
 │
 ├── agent-backend/
 │   ├── main.py                 # FastAPI app exposing /chat and /reset
-│   ├── agent.py                # LangChain agent setup (Cerebras LLM (llama 3.1 8b) + tools)
+│   ├── agent.py                # LangChain agent setup (Groq LLM (llama-3.3-70b-versatile) + tools)
 │   ├── tools.py                # LangChain tools wrapping MCP server endpoints
 │   ├── requirements.txt        # Python dependencies
 │   ├── Dockerfile
