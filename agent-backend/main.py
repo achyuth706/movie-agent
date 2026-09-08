@@ -22,7 +22,7 @@ load_dotenv()
 
 from agent import run_agent  # noqa: E402 — must come after load_dotenv
 
-MODEL_NAME = "llama-3.3-70b-versatile (Groq)"
+MODEL_NAME = "openai/gpt-oss-120b (Groq)"
 
 app = FastAPI(title="Movie Agent Backend")
 

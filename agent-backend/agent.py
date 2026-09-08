@@ -61,7 +61,7 @@ rather than dumping raw tool output at the user.
 6. Keep answers focused and concise unless the user explicitly asks for more detail."""
 
 llm = ChatOpenAI(
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-120b",
     api_key=GROQ_API_KEY,
     base_url="https://api.groq.com/openai/v1",
     temperature=0,

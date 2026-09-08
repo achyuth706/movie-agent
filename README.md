@@ -23,7 +23,7 @@ An AI-powered movie assistant that answers natural-language questions about film
 | Frontend        | React 18, Vite, CSS                         | Chat UI — sends messages, renders agent responses    |
 | Agent Backend   | Python, FastAPI, LangChain, Groq LLM        | Runs the LLM agent; selects and calls MCP tools      |
 | MCP Server      | Python, FastAPI, Requests                   | Wraps OMDb API into structured HTTP endpoints        |
-| LLM             | Groq API — `llama-3.3-70b-versatile`        | Tool-calling language model powering the agent       |
+| LLM             | Groq API — `openai/gpt-oss-120b`            | Tool-calling language model powering the agent       |
 | Movie Data      | OMDb API                                    | Source of all movie and TV series information        |
 
 ---
@@ -138,7 +138,7 @@ movie-agent/
 │
 ├── agent-backend/
 │   ├── main.py                 # FastAPI app exposing /chat and /reset
-│   ├── agent.py                # LangChain agent setup (Groq LLM (llama-3.3-70b-versatile) + tools)
+│   ├── agent.py                # LangChain agent setup (Groq LLM (openai/gpt-oss-120b) + tools)
 │   ├── tools.py                # LangChain tools wrapping MCP server endpoints
 │   ├── requirements.txt        # Python dependencies
 │   ├── Dockerfile
