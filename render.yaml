@@ -21,7 +21,7 @@ services:
       - key: CEREBRAS_API_KEY
         sync: false
       - key: MCP_SERVER_URL
-        value: https://movie-mcp-server.onrender.com
+        value: https://movie-mcp-server-r7ey.onrender.com
 
   - type: web
     name: movie-frontend
@@ -31,7 +31,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_AGENT_URL
-        value: https://movie-agent-backend.onrender.com
+        value: https://movie-agent-backend-ydga.onrender.com
     routes:
       - type: rewrite
         source: /*
