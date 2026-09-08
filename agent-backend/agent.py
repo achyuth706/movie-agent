@@ -61,7 +61,7 @@ rather than dumping raw tool output at the user.
 6. Keep answers focused and concise unless the user explicitly asks for more detail."""
 
 llm = ChatOpenAI(
-    model="llama3.1-8b",
+    model="gpt-oss-120b",
     api_key=CEREBRAS_API_KEY,
     base_url="https://api.cerebras.ai/v1",
     temperature=0,
