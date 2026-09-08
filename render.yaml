@@ -23,8 +23,9 @@ services:
       - key: MCP_SERVER_URL
         value: https://movie-mcp-server-r7ey.onrender.com
 
-  - type: static
+  - type: web
     name: movie-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
