@@ -2,6 +2,7 @@ services:
   - type: web
     name: movie-mcp-server
     runtime: docker
+    plan: free
     rootDir: mcp-server
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
@@ -12,6 +13,7 @@ services:
   - type: web
     name: movie-agent-backend
     runtime: docker
+    plan: free
     rootDir: agent-backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
