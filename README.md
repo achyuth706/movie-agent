@@ -12,12 +12,14 @@ An AI-powered movie assistant that answers natural-language questions about film
 
 Three independently deployable services, each with a single job:
 
-```
-┌──────────────────┐        ┌────────────────────┐        ┌──────────────────┐        ┌─────────────┐
-│     Frontend      │        │   Agent Backend     │        │    MCP Server     │        │  OMDb API   │
-│  React + Vite      │──────▶│  FastAPI + LangChain │──────▶│     FastAPI        │──────▶│ omdbapi.com  │
-│  (chat UI)         │◀──────│  (the "brain")       │◀──────│  (data adapter)    │◀──────│              │
-└──────────────────┘        └────────────────────┘        └──────────────────┘        └─────────────┘
+```mermaid
+flowchart LR
+    A["Frontend<br/>React + Vite<br/>(chat UI)"] -->|"POST /chat"| B["Agent Backend<br/>FastAPI + LangChain<br/>(the brain)"]
+    B -->|response| A
+    B -->|"GET /search, /details, ..."| C["MCP Server<br/>FastAPI<br/>(data adapter)"]
+    C -->|JSON| B
+    C -->|"GET"| D["OMDb API<br/>omdbapi.com"]
+    D -->|JSON| C
 ```
 
 | Service       | Local URL             | Deployed URL                                                     |
