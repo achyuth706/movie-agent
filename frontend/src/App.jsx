@@ -4,8 +4,9 @@ import ChatWindow from './components/ChatWindow';
 import ChatInput from './components/ChatInput';
 import './App.css';
 
-const AGENT_URL  = 'http://localhost:8000/chat';
-const HEALTH_URL = 'http://localhost:8000/health';
+const API_BASE_URL = import.meta.env.VITE_AGENT_URL || 'http://localhost:8000';
+const AGENT_URL  = `${API_BASE_URL}/chat`;
+const HEALTH_URL = `${API_BASE_URL}/health`;
 
 const WELCOME = {
   role: 'agent',

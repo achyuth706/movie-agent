@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: movie-mcp-server
+    runtime: docker
+    rootDir: mcp-server
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: OMDB_API_KEY
+        sync: false
+
+  - type: web
+    name: movie-agent-backend
+    runtime: docker
+    rootDir: agent-backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: CEREBRAS_API_KEY
+        sync: false
+      - key: MCP_SERVER_URL
+        value: https://movie-mcp-server.onrender.com
+
+  - type: web
+    name: movie-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_AGENT_URL
+        value: https://movie-agent-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
